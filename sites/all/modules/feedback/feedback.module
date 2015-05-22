@@ -22,9 +22,6 @@
 */
   function form_feed_form($form, &$form_state) {
 
-
-
-
 //Adding radio button
   $form['choice'] = array(
     '#type' => 'radios',
@@ -39,11 +36,7 @@
   );
 
 
-//Adding submit button
-  $form['submit_button'] = array(
-    '#type'  => 'submit',
-    '#value' => t('Click Here!'),
-  );
+
 /*
 *This code is render the form elements on the basis user radio choice
 *isset() check that $form_states['values'] is set or not
@@ -53,7 +46,7 @@
   if (isset($form_state['values'])=='')
   {
           //Adding select list
-    $form['limiter'] = array(
+    $form['names'] = array(
       '#type' => 'select',
       '#title' => t('Choose a value'),
       '#id' => 'limiter',
@@ -64,12 +57,14 @@
   {
     if($form_state['values']['choice']==0)
       {
-        $form['limiter'] = array(
+        $form['names'] = array(
           '#type' => 'select',
           '#title' => t('Choose a value'),
-          '#id' => 'limiter',
+          '#id' => 'names',
           '#options' => get_teacher_names(),
         );
+        drupal_set_message($form['names']['#options'][$form_state['values']['names']]);
+
       }
     else
       {
@@ -80,6 +75,11 @@
       }
 
   }
+  //Adding submit button
+  $form['submit_button'] = array(
+    '#type'  => 'submit',
+    '#value' => t('Click Here!'),
+  );
  return $form;
   }
 
@@ -115,6 +115,9 @@ function get_teacher_names() {
         }
       }
     }
+
+    //feedback options
+
 return $teacher_names;
 }
 
@@ -123,6 +126,7 @@ return $teacher_names;
   function form_feed_form_submit($form, &$form_state) {
 
     $form_state['rebuild']='TRUE';
+
 
   }
 
