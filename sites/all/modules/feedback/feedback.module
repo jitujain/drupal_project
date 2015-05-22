@@ -1,0 +1,128 @@
+<?php
+/*
+*hook_menu function implementation
+*/
+  function feedback_menu(){
+    $items['teacher/feedback'] = array(
+      'title' => 'Feedback Page',
+      'description' => 'Simple custom hook_menu() implementation.',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('form_feed_form'),
+      'access arguments' => array('access content'),
+      'access callback' => TRUE
+    );
+    return $items;
+  }
+
+  function feedback_page() {
+  return "Feedback";
+  }
+/*
+*Creation of a form
+*/
+  function form_feed_form($form, &$form_state) {
+
+
+
+
+//Adding radio button
+  $form['choice'] = array(
+    '#type' => 'radios',
+    '#title' => t('select yr choice'),
+
+    '#default_value' => variable_get('choice', 0),
+    '#values' => array( 0 => 'N', 1 => 'Y'),
+    '#options' => array(
+    t('Add'),
+    t('Edit'),
+    )
+  );
+
+
+//Adding submit button
+  $form['submit_button'] = array(
+    '#type'  => 'submit',
+    '#value' => t('Click Here!'),
+  );
+/*
+*This code is render the form elements on the basis user radio choice
+*isset() check that $form_states['values'] is set or not
+*if set the else code is execute
+*otherwise if code is executed
+*/
+  if (isset($form_state['values'])=='')
+  {
+          //Adding select list
+    $form['limiter'] = array(
+      '#type' => 'select',
+      '#title' => t('Choose a value'),
+      '#id' => 'limiter',
+      '#options' => get_teacher_names(),
+    );
+  }
+  else
+  {
+    if($form_state['values']['choice']==0)
+      {
+        $form['limiter'] = array(
+          '#type' => 'select',
+          '#title' => t('Choose a value'),
+          '#id' => 'limiter',
+          '#options' => get_teacher_names(),
+        );
+      }
+    else
+      {
+        $form['lname'] = array(
+          '#type' => 'textfield',
+           '#title' => 'edit',
+          );
+      }
+
+  }
+ return $form;
+  }
+
+//Validate the form
+  /*function form_feed_form_validate($form, &$form_state) {
+    if ($form_state['values']['fname'] == ""){
+      form_set_error('fname', t('Enter First Name'));
+    }
+    if ($form_state['values']['lname'] == ""){
+      form_set_error('lname', t('Enter Last Name'));
+    }
+  }*/
+
+/**
+*This function get the names of all teachers
+*It is get user name by entityfieldquery
+*
+*/
+function get_teacher_names() {
+
+    $query = new EntityFieldQuery();
+    $query->entityCondition('entity_type', 'user');
+    $result = $query->execute();
+    //get all uid of all users
+    $uids = array_keys($result['user']);
+    //get all User with respect their uid
+    foreach ($uids as $key => $uid) {
+      $user = user_load($uid);
+      //select only those user who have 'teacher' as role
+       if(in_array('teacher', $user->roles)){
+        if(isset($user->name) && !empty($user->name)){
+          $teacher_names[] = $user->name;
+        }
+      }
+    }
+return $teacher_names;
+}
+
+//Submission of the form
+
+  function form_feed_form_submit($form, &$form_state) {
+
+    $form_state['rebuild']='TRUE';
+
+  }
+
