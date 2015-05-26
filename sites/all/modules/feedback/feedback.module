@@ -23,109 +23,184 @@
   function form_feed_form($form, &$form_state) {
 
 //Adding radio button
-  $form['choice'] = array(
-    '#type' => 'radios',
-    '#title' => t('select yr choice'),
+    $form['choice'] = array(
+      '#type' => 'radios',
+      '#title' => t('select yr choice'),
 
-    '#default_value' => variable_get('choice', 0),
-    '#values' => array( 0 => 'N', 1 => 'Y'),
-    '#options' => array(
-    t('Add'),
-    t('Edit'),
-    )
-  );
+      '#default_value' => 0,
+      '#values' => array( 0 => 'N', 1 => 'Y'),
+      '#options' => array(
+      t('Add'),
+      t('Edit'),
+      )
+    );
 
-
-
-/*
-*This code is render the form elements on the basis user radio choice
-*isset() check that $form_states['values'] is set or not
-*if set the else code is execute
-*otherwise if code is executed
-*/
-  if (isset($form_state['values'])=='')
-  {
-          //Adding select list
-    $form['names'] = array(
+    $form['Add'] = array(
       '#type' => 'select',
       '#title' => t('Choose a value'),
-      '#id' => 'limiter',
+      '#id' => 'names',
       '#options' => get_teacher_names(),
+      '#states' => array(
+        'visible' => array(
+        ':input[name="choice"]' => array('value' => '0'),
+        ),
+      ),
     );
-  }
-  else
-  {
-    if($form_state['values']['choice']==0)
-      {
-        $form['names'] = array(
-          '#type' => 'select',
-          '#title' => t('Choose a value'),
-          '#id' => 'names',
-          '#options' => get_teacher_names(),
-        );
-        drupal_set_message($form['names']['#options'][$form_state['values']['names']]);
 
-      }
-    else
-      {
-        $form['lname'] = array(
-          '#type' => 'textfield',
-           '#title' => 'edit',
-          );
-      }
+    $form['Edit'] = array(
+              '#type' => 'select',
+              '#title' => t('Choose a value'),
+              '#id' => 'names1',
+              '#options' => get_feedback_teacher_names(),
+              '#states' => array(
+                'visible' => array(
+                ':input[name="choice"]' => array('value' => '1'),
+                ),
+              ),
+            );
 
-  }
-  //Adding submit button
-  $form['submit_button'] = array(
-    '#type'  => 'submit',
-    '#value' => t('Click Here!'),
-  );
- return $form;
+/*
+*Following code is about the rating fields
+*First one is Knowledge
+*Second one is Attitude
+*Third one is Friendliness
+*Here array contains the visible as array
+ which means this field display only when there is choice is Add
+*/
+
+    $form['Knowledge'] = array(
+            '#type' => 'textfield',
+             '#title' => 'Knowledge',
+             '#description' => 'Give Rating from 0 to 5',
+             '#states' => array(
+              'visible' => array(
+              ':input[name="choice"]' => array('value' => '0'),
+              ),
+            ),
+            );
+    $form['Attitude'] = array(
+            '#type' => 'textfield',
+             '#title' => 'Attitude',
+             '#description' => 'Give Rating from 0 to 5',
+             '#states' => array(
+              'visible' => array(
+              ':input[name="choice"]' => array('value' => '0'),
+              ),
+            ),
+            );
+    $form['Friendliness'] = array(
+            '#type' => 'textfield',
+             '#title' => 'Friendliness',
+             '#description' => 'Give Rating from 0 to 5',
+             '#states' => array(
+              'visible' => array(
+              ':input[name="choice"]' => array('value' => '0'),
+              ),
+            ),
+            );
+    //Adding submit button
+    $form['submit_button'] = array(
+      '#type'  => 'submit',
+      '#value' => t('Click Here!'),
+    );
+  return $form;
   }
 
 //Validate the form
-  /*function form_feed_form_validate($form, &$form_state) {
-    if ($form_state['values']['fname'] == ""){
-      form_set_error('fname', t('Enter First Name'));
+  function form_feed_form_validate($form, &$form_state) {
+   // dpm($form_state);
+    if ($form_state['values']['Knowledge'] == "" ||
+        $form_state['values']['Attitude'] == "" ||
+        $form_state['values']['Friendliness'] == ""){
+      form_set_error('fnamdse', t('Please Give Rating'));
     }
-    if ($form_state['values']['lname'] == ""){
-      form_set_error('lname', t('Enter Last Name'));
+    elseif ($form_state['values']['Knowledge'] <0 ||
+            $form_state['values']['Knowledge'] >5 ) {
+      form_set_error('fnasdme', t('Rating must be betwwn 0 t0 5'));
     }
-  }*/
+    elseif ($form_state['values']['Attitude'] <0 ||
+            $form_state['values']['Attitude'] >5 ) {
+      form_set_error('fnasdme', t('Rating must be betwwn 0 t0 5'));
+    }
+    elseif ($form_state['values']['Friendliness'] <0 ||
+            $form_state['values']['Friendliness'] >5 ) {
+      form_set_error('fnasdme', t('Rating must be betwwn 0 t0 5'));
+    }
+
+  }
 
 /**
 *This function get the names of all teachers
 *It is get user name by entityfieldquery
 *
 */
-function get_teacher_names() {
+  function get_teacher_names() {
 
-    $query = new EntityFieldQuery();
-    $query->entityCondition('entity_type', 'user');
-    $result = $query->execute();
-    //get all uid of all users
-    $uids = array_keys($result['user']);
-    //get all User with respect their uid
-    foreach ($uids as $key => $uid) {
-      $user = user_load($uid);
-      //select only those user who have 'teacher' as role
-       if(in_array('teacher', $user->roles)){
-        if(isset($user->name) && !empty($user->name)){
-          $teacher_names[] = $user->name;
+      $query = new EntityFieldQuery();
+      $query->entityCondition('entity_type', 'user');
+      $result = $query->execute();
+      //get all uid of all users
+      $uids = array_keys($result['user']);
+      //get all User with respect their uid
+      foreach ($uids as $key => $uid) {
+        $user = user_load($uid);
+        //dpm($user);
+        //select only those user who have 'teacher' as role
+         if (in_array('teacher', $user->roles)) {
+          if (isset($user->name) && !empty($user->name)) {
+            $teacher_names[$uid] = $user->name;
+          }
         }
       }
-    }
+      $feedback_teacher[]=get_feedback_teacher_names();
+      dpm(get_feedback_teacher_names());
+      dpm($teacher_names);
+  return array_diff($teacher_names, get_feedback_teacher_names());
+  }
 
-    //feedback options
+//Get teachers names for those feedback is given
+  function get_feedback_teacher_names() {
 
-return $teacher_names;
-}
+      $query = new EntityFieldQuery();
+      $query->entityCondition('entity_type', 'node')
+            ->entityCondition('bundle', 'teacher_feedback');
+      $result = $query->execute();
+      //get all uid of all users
+      $nids = array_keys($result['node']);
+      foreach ($nids as $key => $nid) {
+        $nodes = node_load($nid);
+        $authors = user_load($nodes->field_teacher_ref['und'][0]['target_id']);
+        if(in_array('teacher', $authors->roles)){
+          if(isset($authors->name) && !empty($authors->name)){
+            $feed_teacher_names[] = $authors->name;
+          }
+        }
+      }
+     return $feed_teacher_names;
+  }
 
-//Submission of the form
+/*
+*Submission of the form
+Create a node and
+*on submission form values saved in database
+*/
 
   function form_feed_form_submit($form, &$form_state) {
-
     $form_state['rebuild']='TRUE';
+    $node = new stdClass();
+    $node->language = LANGUAGE_NONE;
+    $node->type = 'teacher_feedback';
+    node_object_prepare($node);
+
+    $node->title = 'Feedback is save on ' . date('c');
+    $node->field_teacher_ref[$node->language][0]['target_id'] = $form_state['values']['Add'];
+    $node->field_attitude[$node->language][0]['value'] = $form_state['values']['Attitude'];
+    $node->field_knowledge[$node->language][0]['value'] = $form_state['values']['Knowledge'];
+    $node->field_friendliness[$node->language][0]['value'] = $form_state['values']['Friendliness'];
+
+   // $node = node_submit($node)
+    node_save($node);
+    drupal_set_message("You have registered successfully.");
 
 
   }
