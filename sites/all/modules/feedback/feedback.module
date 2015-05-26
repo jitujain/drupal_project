@@ -108,7 +108,6 @@
 
 //Validate the form
   function form_feed_form_validate($form, &$form_state) {
-   // dpm($form_state);
     if ($form_state['values']['Knowledge'] == "" ||
         $form_state['values']['Attitude'] == "" ||
         $form_state['values']['Friendliness'] == ""){
@@ -144,7 +143,6 @@
       //get all User with respect their uid
       foreach ($uids as $key => $uid) {
         $user = user_load($uid);
-        //dpm($user);
         //select only those user who have 'teacher' as role
          if (in_array('teacher', $user->roles)) {
           if (isset($user->name) && !empty($user->name)) {
@@ -153,30 +151,49 @@
         }
       }
       $feedback_teacher[]=get_feedback_teacher_names();
-      dpm(get_feedback_teacher_names());
-      dpm($teacher_names);
-  return array_diff($teacher_names, get_feedback_teacher_names());
+      if(!empty(get_feedback_teacher_names())){
+        return array_diff($teacher_names, get_feedback_teacher_names());
+      }
+      else
+      {
+        return $teacher_names;
+      }
   }
 
 //Get teachers names for those feedback is given
   function get_feedback_teacher_names() {
-
+      global $user;
       $query = new EntityFieldQuery();
       $query->entityCondition('entity_type', 'node')
             ->entityCondition('bundle', 'teacher_feedback');
       $result = $query->execute();
       //get all uid of all users
+      //dpm($user);
+      if(!empty($result))
+      {
       $nids = array_keys($result['node']);
       foreach ($nids as $key => $nid) {
         $nodes = node_load($nid);
-        $authors = user_load($nodes->field_teacher_ref['und'][0]['target_id']);
-        if(in_array('teacher', $authors->roles)){
-          if(isset($authors->name) && !empty($authors->name)){
-            $feed_teacher_names[] = $authors->name;
+        //dpm($nodes);
+        if($user->uid==$nodes->uid)
+        {
+          $authors = user_load($nodes->field_teacher_ref['und'][0]['target_id']);
+          if(in_array('teacher', $authors->roles)){
+            if(isset($authors->name) && !empty($authors->name)){
+              $feed_teacher_names[] = $authors->name;
+            }
           }
         }
+        else
+        {
+          $feed_teacher_names[0] ='';
+
+        }
       }
-     return $feed_teacher_names;
+      return $feed_teacher_names;
+      }
+
+
   }
 
 /*
@@ -186,12 +203,13 @@ Create a node and
 */
 
   function form_feed_form_submit($form, &$form_state) {
-    $form_state['rebuild']='TRUE';
+    global $user;
     $node = new stdClass();
     $node->language = LANGUAGE_NONE;
     $node->type = 'teacher_feedback';
     node_object_prepare($node);
-
+    $node->uid = $user->uid;
+    $node->status = 1;
     $node->title = 'Feedback is save on ' . date('c');
     $node->field_teacher_ref[$node->language][0]['target_id'] = $form_state['values']['Add'];
     $node->field_attitude[$node->language][0]['value'] = $form_state['values']['Attitude'];
