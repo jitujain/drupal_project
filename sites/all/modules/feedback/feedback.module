@@ -1,6 +1,54 @@
 <?php
+
 /*
-*hook_menu function implementation
+*hook_permission implementation.
+* This function register this menu for the permission page.
+* From the permission page admin can define the roles.
+*/
+
+  function feedback_permission() {
+    return array(
+      'give feedback' => array(
+        'title' => t('Give feedback'),
+        'description' => t('Allow certain roles to view feedback without control of the settings.'),
+      ),
+      'view feedback' => array(
+        'title' => t('View feedback'),
+        'description' => t('Allow certain roles to view feedback without control of the settings.'),
+      ),
+      'administer feedback' => array(
+        'title' => t('Administer feedback'),
+        'description' => t('Add, delete and edit the settings for feedback.'),
+      ),
+    );
+  }
+
+
+  function feedback_block_info() {
+    $blocks = array();
+    $blocks['feedback_rating_avg_block'] = array(
+      'info' => t('Feedback Block'),
+    );
+
+    return $blocks;
+  }
+
+  function feedback_block_view($delta='') {
+    $block = array();
+    switch($delta) {
+      case 'feedback_rating_avg_block' :
+        $block['subject'] = t('Your Rating');
+        $block['content'] = get_avg();
+        break;
+    }
+    return $block;
+  }
+
+/*
+*hook_menu function implementation.
+*
+* $items['teacher/feedback'] is return a form.
+* The path of that page is 'teacher/feedback'.
 */
   function feedback_menu(){
     $items['teacher/feedback'] = array(
@@ -8,25 +56,45 @@
       'description' => 'Simple custom hook_menu() implementation.',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('form_feed_form'),
-      'access arguments' => array('access content'),
-      'access callback' => TRUE
+      'access callback' => 'user_access',
+      'access arguments' => array('give feedback'),
+
+
+    );
+    $items['teacher/view-feedback'] = array(
+      'title' => 'Feedback Page',
+      'description' => 'Simple custom hook_menu() implementation.',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('student_feedback_form'),
+      'access callback' => 'user_access',
+      'access arguments' => array('view feedback'),
+
+
     );
     return $items;
   }
 
-  function feedback_page() {
-  return "Feedback";
-  }
+
 /*
-*Creation of a form
+*Creation of a form.
+*
+* $form['choice'] add the radio buttons.
+* $form['Add'] add the dropdownlist
+* -in which values are get from get_teacher_names() function.
+* $form['Edit'] add the dropdownlist
+* -in which values are get from get_feed_teacher_names() function.
 */
   function form_feed_form($form, &$form_state) {
 
-//Adding radio button
+    if (isset($form_state['values']['Edit'])) {
+      $teacher_select = $form_state['values']['Edit'];
+      $prevalues = get_prevalues($teacher_select);
+    }
+
+
     $form['choice'] = array(
       '#type' => 'radios',
       '#title' => t('select yr choice'),
-
       '#default_value' => 0,
       '#values' => array( 0 => 'N', 1 => 'Y'),
       '#options' => array(
@@ -45,69 +113,130 @@
         ':input[name="choice"]' => array('value' => '0'),
         ),
       ),
+      // '#ajax' => array(
+      //   'callback' => 'add_prefill_value',
+      //   'wrapper' => 'teacher_rating_wrapper',
+      //   'effect' => 'fade',
+      //   'event' => 'click',
+      // ),
     );
 
     $form['Edit'] = array(
-              '#type' => 'select',
-              '#title' => t('Choose a value'),
-              '#id' => 'names1',
-              '#options' => get_feedback_teacher_names(),
-              '#states' => array(
-                'visible' => array(
-                ':input[name="choice"]' => array('value' => '1'),
-                ),
-              ),
-            );
+      '#type' => 'select',
+      '#title' => t('Choose a value'),
+      '#id' => 'names1',
+      '#options' => get_feedback_teacher_names(),
+      '#states' => array(
+        'visible' => array(
+        ':input[name="choice"]' => array('value' => '1'),
+        ),
+      ),
+      '#ajax' => array(
+        'callback' => 'add_prefill_value',
+        'wrapper' => 'teacher_rating_wrapper',
+        'effect' => 'fade',
+        'method' => 'replace',
+      ),
+    );
 
+
+    $form['teacher_rating_wrapper'] = array(
+      '#prefix' => '<div id="teacher_rating_wrapper">',
+      '#suffix' => '</div>',
+      '#type' => 'container',
+    );
 /*
-*Following code is about the rating fields
-*First one is Knowledge
-*Second one is Attitude
-*Third one is Friendliness
+*Following code is about the rating fields.
+*
+* First one is Knowledge
+* Second one is Attitude
+* Third one is Friendliness
 *Here array contains the visible as array
  which means this field display only when there is choice is Add
 */
 
-    $form['Knowledge'] = array(
-            '#type' => 'textfield',
-             '#title' => 'Knowledge',
-             '#description' => 'Give Rating from 0 to 5',
-             '#states' => array(
-              'visible' => array(
-              ':input[name="choice"]' => array('value' => '0'),
-              ),
-            ),
-            );
-    $form['Attitude'] = array(
-            '#type' => 'textfield',
-             '#title' => 'Attitude',
-             '#description' => 'Give Rating from 0 to 5',
-             '#states' => array(
-              'visible' => array(
-              ':input[name="choice"]' => array('value' => '0'),
-              ),
-            ),
-            );
-    $form['Friendliness'] = array(
-            '#type' => 'textfield',
-             '#title' => 'Friendliness',
-             '#description' => 'Give Rating from 0 to 5',
-             '#states' => array(
-              'visible' => array(
-              ':input[name="choice"]' => array('value' => '0'),
-              ),
-            ),
-            );
+
+    //dpm($prevalues['Knowledge']);
+    $form['teacher_rating_wrapper']['Knowledge'] = array(
+      '#type' => 'textfield',
+      '#title' => 'Knowledge',
+      '#description' => 'Give Rating from 0 to 5',
+      '#default_value' => isset($prevalues['Knowledge']) ? $prevalues['Knowledge'] : '',
+    );
+    $form['teacher_rating_wrapper']['Attitude'] = array(
+      '#type' => 'textfield',
+      '#title' => 'Attitude',
+      '#description' => 'Give Rating from 0 to 5',
+      '#default_value' => isset($prevalues['Attitude']) ? $prevalues['Attitude'] : '',
+    );
+    $form['teacher_rating_wrapper']['Friendliness'] = array(
+      '#type' => 'textfield',
+      '#title' => 'Friendliness',
+      '#description' => 'Give Rating from 0 to 5',
+      '#default_value' => isset($prevalues['Friendliness']) ? $prevalues['Friendliness'] : '',
+    );
+
+
+    //Adding submit button
+    $form['sub'] = array(
+      '#prefix' => '<div id="eacher_rr">',
+      '#suffix' => '</div>',
+      '#type'  => 'container',
+    );
+
     //Adding submit button
     $form['submit_button'] = array(
       '#type'  => 'submit',
       '#value' => t('Click Here!'),
     );
+
+  //dpm($form);
   return $form;
+  }
+
+
+  function add_prefill_value($form, &$form_state){
+    dpm($form_state);
+    if (isset($form_state['values']['Edit'])) {
+      return $form['teacher_rating_wrapper'];
+    }
+    // if (isset($form_state['values']['Add'])) {
+    //   drupal_add_js(array('feedback' => array('tax_rate' => '0.06')), 'setting');
+    //   return $form['teacher_rating_wrapper'];
+    // }
+
+  //dpm($form_state['values']['Edit']);
+  }
+  function get_prevalues($teacher_select) {
+    global $user;
+    $query = new EntityFieldQuery();
+    $query->entityCondition('entity_type', 'node')
+          ->entityCondition('bundle', 'teacher_feedback');
+    $result = $query->execute();
+    //dpm($result);
+    $nids = array_keys($result['node']);
+    foreach ($nids as $key => $nid) {
+      $nodes = node_load($nid);
+
+      if ($user->uid==$nodes->uid) {
+        $teacher_ref=$nodes->field_teacher_ref['und'][0]['target_id'];
+        if ($teacher_select == $teacher_ref) {
+          $prefillvalues = array(
+            'Knowledge' => $nodes->field_knowledge['und'][0]['value'],
+            'Attitude' => $nodes->field_attitude['und'][0]['value'],
+            'Friendliness' => $nodes->field_friendliness['und'][0]['value']);
+        }
+
+
+      }
+    }
+    return $prefillvalues;
   }
 
 //Validate the form
   function form_feed_form_validate($form, &$form_state) {
+    dpm($form_state);
+
     if ($form_state['values']['Knowledge'] == "" ||
         $form_state['values']['Attitude'] == "" ||
         $form_state['values']['Friendliness'] == ""){
@@ -135,63 +264,66 @@
 */
   function get_teacher_names() {
 
-      $query = new EntityFieldQuery();
-      $query->entityCondition('entity_type', 'user');
-      $result = $query->execute();
-      //get all uid of all users
-      $uids = array_keys($result['user']);
-      //get all User with respect their uid
-      foreach ($uids as $key => $uid) {
-        $user = user_load($uid);
-        //select only those user who have 'teacher' as role
-         if (in_array('teacher', $user->roles)) {
-          if (isset($user->name) && !empty($user->name)) {
-            $teacher_names[$uid] = $user->name;
-          }
+    $query = new EntityFieldQuery();
+    $query->entityCondition('entity_type', 'user');
+    $result = $query->execute();
+
+    //get all uid of all users
+    $uids = array_keys($result['user']);
+
+    //get all User with respect their uid
+    foreach ($uids as $key => $uid) {
+      $user = user_load($uid);
+
+      //select only those user who have 'teacher' as role
+       if (in_array('teacher', $user->roles)) {
+        if (isset($user->name) && !empty($user->name)) {
+          $teacher_names[$uid] = $user->name;
         }
       }
-      $feedback_teacher[]=get_feedback_teacher_names();
-      if(!empty(get_feedback_teacher_names())){
-        return array_diff($teacher_names, get_feedback_teacher_names());
-      }
-      else
-      {
-        return $teacher_names;
-      }
+    }
+    $feedback_teacher[]=get_feedback_teacher_names();
+    if(!empty(get_feedback_teacher_names())){
+      return array_diff($teacher_names, get_feedback_teacher_names());
+    }
+    else
+    {
+      return $teacher_names;
+    }
   }
 
 //Get teachers names for those feedback is given
   function get_feedback_teacher_names() {
-      global $user;
-      $query = new EntityFieldQuery();
-      $query->entityCondition('entity_type', 'node')
-            ->entityCondition('bundle', 'teacher_feedback');
-      $result = $query->execute();
-      //get all uid of all users
-      //dpm($user);
-      if(!empty($result))
+    global $user;
+    $query = new EntityFieldQuery();
+    $query->entityCondition('entity_type', 'node')
+          ->entityCondition('bundle', 'teacher_feedback');
+    $result = $query->execute();
+    //get all uid of all users
+    //dpm($user);
+    if(!empty($result))
+    {
+    $nids = array_keys($result['node']);
+    foreach ($nids as $key => $nid) {
+      $nodes = node_load($nid);
+      //dpm($nodes);
+      if($user->uid==$nodes->uid)
       {
-      $nids = array_keys($result['node']);
-      foreach ($nids as $key => $nid) {
-        $nodes = node_load($nid);
-        //dpm($nodes);
-        if($user->uid==$nodes->uid)
-        {
-          $authors = user_load($nodes->field_teacher_ref['und'][0]['target_id']);
-          if(in_array('teacher', $authors->roles)){
-            if(isset($authors->name) && !empty($authors->name)){
-              $feed_teacher_names[] = $authors->name;
-            }
+        $authors = user_load($nodes->field_teacher_ref['und'][0]['target_id']);
+        if(in_array('teacher', $authors->roles)){
+          if(isset($authors->name) && !empty($authors->name)){
+            $feed_teacher_names[$authors->uid] = $authors->name;
           }
         }
-        else
-        {
-          $feed_teacher_names[0] ='';
+      }
+      else
+      {
+        $feed_teacher_names[0] ='select';
 
-        }
       }
-      return $feed_teacher_names;
-      }
+    }
+    return $feed_teacher_names;
+    }
 
 
   }
@@ -219,7 +351,134 @@ Create a node and
    // $node = node_submit($node)
     node_save($node);
     drupal_set_message("You have registered successfully.");
-
-
   }
+
+
+/*
+* Form which render the student list whose
+* -given the feedback to the logged teacher.
+*/
+  function student_feedback_form($form, &$form_state) {
+
+    if (isset($form_state['values']['selectlist'])) {
+      $student_select = $form_state['values']['selectlist'];
+      dpm($student_select);
+      //$given_rating = get_values($student_select);
+    }
+
+    $form['selectlist'] = array(
+      '#type' => 'select',
+      '#title' => t('Choose a value'),
+      '#id' => 'names1',
+      '#options' => get_students_names(),
+      '#ajax' => array(
+        'callback' => 'show_values',
+        'wrapper' => 'given_rating_wrapper',
+        'effect' => 'fade',
+        'method' => 'html',
+      ),
+    );
+
+      // //Adding submit button
+      // $form['submit_button'] = array(
+      //   '#type'  => 'submit',
+      //   '#value' => t('Click Here!'),
+      // );
+    $form['given'] = array(
+      '#type' => 'container',
+      '#prefix' => '<div id="given_rating_wrapper">',
+      '#suffix' => '</div>',
+    );
+    if (isset($form_state['values']['selectlist']) && !empty($form_state['values']['selectlist'])) {
+      $form['given']['name'] = array(
+        '#type' => 'textfield',
+        '#title' => 'Name',
+      );
+    }
+    return $form;
+  }
+
+  function get_students_names() {
+    global $user;
+    //dpm($user);
+    $query = new EntityFieldQuery();
+    $query->entityCondition('entity_type', 'node')
+          ->entityCondition('bundle', 'teacher_feedback');
+    $result = $query->execute();
+    //get all uid of all users
+    //dpm($user);
+    $sum = 0;
+    $count = 0;
+    if(!empty($result))
+    {
+      $nids = array_keys($result['node']);
+      foreach ($nids as $key => $nid) {
+        $nodes = node_load($nid);
+        //dpm($nodes);
+          if ($user->uid == $nodes->field_teacher_ref['und'][0]['target_id']) {
+            $students = user_load($nodes->uid);
+            $count++;
+            //dpm($nodes);
+            $sum = $sum + $nodes->field_attitude['und'][0]['value'];
+            $sum = $sum + $nodes->field_knowledge['und'][0]['value'];
+            $sum = $sum + $nodes->field_friendliness['und'][0]['value'];
+
+            //dpm($students);
+            if(in_array('student', $students->roles)){
+              if(isset($students->name) && !empty($students->name)){
+                $student_names[$students->uid] = $students->name;
+              }
+            }
+
+          }
+          else
+          {
+            $student_names[0] = 'select';
+          }
+      }
+      //$avg = $sum/(3*$count);
+      //$student_names['values'][0] = $avg;
+      // $header =array(array('data' => 'Avg'),array('data' => 'Avg1'));
+      // $row[] = array(array('data' => 'jgfh'),array('data' => 'jgfh'));
+      // dpm($header);
+      // dpm($row);
+      // echo theme('table',array( 'header' => $header),array('row' => $row));
+      //print_r($avg);
+    }
+    return $student_names;
+  }
+  function get_avg() {
+    global $user;
+    $query = new EntityFieldQuery();
+    $query->entityCondition('entity_type', 'node')
+          ->entityCondition('bundle', 'teacher_feedback');
+    $result = $query->execute();
+    //get all uid of all users
+    $sum = 0;
+    $count = 0;
+
+    if (!empty($result)) {
+      $nids = array_keys($result['node']);
+      foreach ($nids as $key => $nid) {
+        $nodes = node_load($nid);
+          if ($user->uid == $nodes->field_teacher_ref['und'][0]['target_id']) {
+            $students = user_load($nodes->uid);
+            $count++;
+            $sum += $nodes->field_attitude['und'][0]['value'] + $nodes->field_knowledge['und'][0]['value'] + $nodes->field_friendliness['und'][0]['value'];
+          }
+      }
+      if ($count != 0) {
+        $avg = '' . $sum / (3 * $count);
+      }
+      else {
+        $avg = 'No one give rating  you yet' ;
+      }
+    }
+    return $avg;
+  }
+
+  function show_values($form, &$form_state){
+         return $form['given'];
+  }
+
 
