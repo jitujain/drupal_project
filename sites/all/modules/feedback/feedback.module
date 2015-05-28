@@ -196,7 +196,7 @@
 
 
   function add_prefill_value($form, &$form_state){
-    dpm($form_state);
+
     if (isset($form_state['values']['Edit'])) {
       return $form['teacher_rating_wrapper'];
     }
@@ -235,7 +235,7 @@
 
 //Validate the form
   function form_feed_form_validate($form, &$form_state) {
-    dpm($form_state);
+
 
     if ($form_state['values']['Knowledge'] == "" ||
         $form_state['values']['Attitude'] == "" ||
@@ -362,8 +362,7 @@ Create a node and
 
     if (isset($form_state['values']['selectlist'])) {
       $student_select = $form_state['values']['selectlist'];
-      dpm($student_select);
-      //$given_rating = get_values($student_select);
+      $given_rating = get_values($student_select);
     }
 
     $form['selectlist'] = array(
@@ -375,7 +374,7 @@ Create a node and
         'callback' => 'show_values',
         'wrapper' => 'given_rating_wrapper',
         'effect' => 'fade',
-        'method' => 'html',
+        'method' => 'replace',
       ),
     );
 
@@ -385,14 +384,26 @@ Create a node and
       //   '#value' => t('Click Here!'),
       // );
     $form['given'] = array(
+      '#tree' => TRUE,
       '#type' => 'container',
       '#prefix' => '<div id="given_rating_wrapper">',
       '#suffix' => '</div>',
     );
     if (isset($form_state['values']['selectlist']) && !empty($form_state['values']['selectlist'])) {
-      $form['given']['name'] = array(
+      $form['given']['Attitude'] = array(
         '#type' => 'textfield',
-        '#title' => 'Name',
+        '#title' => 'Attitude',
+        '#value' => $given_rating['Attitude']
+      );
+      $form['given']['Knowledge'] = array(
+        '#type' => 'textfield',
+        '#title' => 'Knowledge',
+        '#value' => $given_rating['Knowledge']
+      );
+      $form['given']['Friendliness'] = array(
+        '#type' => 'textfield',
+        '#title' => 'Friendliness',
+        '#value' => $given_rating['Friendliness']
       );
     }
     return $form;
@@ -476,6 +487,36 @@ Create a node and
     }
     return $avg;
   }
+  function get_values($student_select) {
+    global $user;
+    $query = new EntityFieldQuery();
+    $query->entityCondition('entity_type', 'node')
+          ->entityCondition('bundle', 'teacher_feedback');
+    $result = $query->execute();
+    //get all uid of all users
+    if (!empty($result)) {
+      $nids = array_keys($result['node']);
+      foreach ($nids as $key => $nid) {
+        $nodes = node_load($nid);
+          if ($user->uid == $nodes->field_teacher_ref['und'][0]['target_id']) {
+            $students = user_load($nodes->uid);
+            if ($students->uid == $student_select) {
+              $rating_values = array(
+                'Knowledge' => $nodes->field_knowledge['und'][0]['value'],
+                'Attitude' => $nodes->field_attitude['und'][0]['value'],
+                'Friendliness' => $nodes->field_friendliness['und'][0]['value']);
+
+            }
+
+            $count++;
+            $sum += $nodes->field_attitude['und'][0]['value'] + $nodes->field_knowledge['und'][0]['value'] + $nodes->field_friendliness['und'][0]['value'];
+          }
+      }
+
+    }
+    return $rating_values;
+  }
+
 
   function show_values($form, &$form_state){
          return $form['given'];
