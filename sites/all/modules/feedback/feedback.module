@@ -162,35 +162,35 @@
 
   // dpm($prevalues);
     $form['kstar'] = array(
-      '#prefix' => '<div id="Knowledge-rating-star class = "divspace">
+      '#prefix' => '<div id="Knowledge-rating-star" class = "divspace">
       Knowledge<br>
-      <span class = "whitestar spanspace"></span>
-      <span class = "whitestar spanspace"></span>
-      <span class = "whitestar spanspace"></span>
-      <span class = "whitestar spanspace"></span>
-      <span class = "whitestar spanspace"></span>',
+      <span class = "whitestar spanspace knowledge 1"></span>
+      <span class = "whitestar spanspace knowledge 2"></span>
+      <span class = "whitestar spanspace knowledge 3"></span>
+      <span class = "whitestar spanspace knowledge 4"></span>
+      <span class = "whitestar spanspace knowledge 5"></span>',
       '#suffix' => '</div>',
       '#type' => 'container',
     );
     $form['astar'] = array(
-      '#prefix' => '<div id="Attitude-rating-star class = "divspace">
+      '#prefix' => '<div id="Attitude-rating-star" class = "divspace">
       Attitude<br>
-      <span class = "whitestar spanspace"></span>
-      <span class = "whitestar spanspace"></span>
-      <span class = "whitestar spanspace"></span>
-      <span class = "whitestar spanspace"></span>
-      <span class = "whitestar spanspace"></span>',
+      <span class = "whitestar spanspace attitude 1"></span>
+      <span class = "whitestar spanspace attitude 2"></span>
+      <span class = "whitestar spanspace attitude 3"></span>
+      <span class = "whitestar spanspace attitude 4"></span>
+      <span class = "whitestar spanspace attitude 5"></span>',
       '#suffix' => '</div>',
       '#type' => 'container',
     );
     $form['fstar'] = array(
-      '#prefix' => '<div id="Friendliness-rating-star class = "divspace">
+      '#prefix' => '<div id="Friendliness-rating-star" class = "divspace">
       Friendliness<br>
-      <span class = "whitestar spanspace"></span>
-      <span class = "whitestar spanspace"></span>
-      <span class = "whitestar spanspace"></span>
-      <span class = "whitestar spanspace"></span>
-      <span class = "whitestar spanspace"></span>',
+      <span class = "whitestar spanspace friendliness 1"></span>
+      <span class = "whitestar spanspace friendliness 2"></span>
+      <span class = "whitestar spanspace friendliness 3"></span>
+      <span class = "whitestar spanspace friendliness 4"></span>
+      <span class = "whitestar spanspace friendliness 5"></span>',
       '#suffix' => '</div>',
       '#type' => 'container',
     );
