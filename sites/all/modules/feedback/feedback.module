@@ -85,11 +85,13 @@
 * -in which values are get from get_feed_teacher_names() function.
 */
   function form_feed_form($form, &$form_state) {
-
+     drupal_add_js('/sites/all/modules/feedback/feedback.js');
     if (isset($form_state['values']['Edit'])) {
       $teacher_select = $form_state['values']['Edit'];
       $prevalues = get_prevalues($teacher_select);
+      dpm($prevalues['Friendliness'] . $prevalues['Attitude'] . $prevalues['Knowledge']);
     }
+
 
 
     $form['choice'] = array(
@@ -135,7 +137,7 @@
         'callback' => 'add_prefill_value',
         'wrapper' => 'teacher_rating_wrapper',
         'effect' => 'fade',
-        'method' => 'replace',
+        'method' => 'html',
       ),
     );
 
@@ -156,12 +158,12 @@
 */
 
 
-    //dpm($prevalues['Knowledge']);
+  // dpm($prevalues);
     $form['teacher_rating_wrapper']['Knowledge'] = array(
       '#type' => 'textfield',
       '#title' => 'Knowledge',
       '#description' => 'Give Rating from 0 to 5',
-      '#default_value' => isset($prevalues['Knowledge']) ? $prevalues['Knowledge'] : '',
+      '#value' => isset($prevalues['Knowledge']) ? $prevalues['Knowledge'] : '',
     );
     $form['teacher_rating_wrapper']['Attitude'] = array(
       '#type' => 'textfield',
@@ -169,6 +171,7 @@
       '#description' => 'Give Rating from 0 to 5',
       '#default_value' => isset($prevalues['Attitude']) ? $prevalues['Attitude'] : '',
     );
+
     $form['teacher_rating_wrapper']['Friendliness'] = array(
       '#type' => 'textfield',
       '#title' => 'Friendliness',
@@ -178,11 +181,11 @@
 
 
     //Adding submit button
-    $form['sub'] = array(
-      '#prefix' => '<div id="eacher_rr">',
-      '#suffix' => '</div>',
-      '#type'  => 'container',
-    );
+    // $form['sub'] = array(
+    //   '#prefix' => '<div id="eacher_rr">',
+    //   '#suffix' => '</div>',
+    //   '#type'  => 'container',
+    // );
 
     //Adding submit button
     $form['submit_button'] = array(
@@ -190,7 +193,7 @@
       '#value' => t('Click Here!'),
     );
 
-  //dpm($form);
+
   return $form;
   }
 
@@ -198,12 +201,13 @@
   function add_prefill_value($form, &$form_state){
 
     if (isset($form_state['values']['Edit'])) {
+      $form_state['rebuild'] = TRUE;
       return $form['teacher_rating_wrapper'];
     }
-    // if (isset($form_state['values']['Add'])) {
-    //   drupal_add_js(array('feedback' => array('tax_rate' => '0.06')), 'setting');
-    //   return $form['teacher_rating_wrapper'];
-    // }
+     // if (isset($form_state['values']['Add'])) {
+     //  // drupal_add_js(array('feedback' => array('tax_rate' => '0.06')), 'setting');
+     //   return $form['teacher_rating_wrapper'];
+     // }
 
   //dpm($form_state['values']['Edit']);
   }
