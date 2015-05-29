@@ -85,7 +85,8 @@
 * -in which values are get from get_feed_teacher_names() function.
 */
   function form_feed_form($form, &$form_state) {
-     drupal_add_js('/sites/all/modules/feedback/feedback.js');
+    // drupal_add_js('/sites/all/modules/feedback/feedback.js');
+    drupal_add_js(drupal_get_path('module', 'feedback') . '/feedback.js');
     if (isset($form_state['values']['Edit'])) {
       $teacher_select = $form_state['values']['Edit'];
       $prevalues = get_prevalues($teacher_select);
