@@ -110,7 +110,7 @@
       '#type' => 'select',
       '#title' => t('Choose a value'),
       '#id' => 'names',
-      '#options' => get_teacher_names(),
+      '#options' => get_teacher_names1(),
       '#states' => array(
         'visible' => array(
         ':input[name="choice"]' => array('value' => '0'),
