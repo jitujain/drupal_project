@@ -87,6 +87,7 @@
   function form_feed_form($form, &$form_state) {
     // drupal_add_js('/sites/all/modules/feedback/feedback.js');
     drupal_add_js(drupal_get_path('module', 'feedback') . '/feedback.js');
+    drupal_add_css(drupal_get_path('module', 'feedback') . '/feedback.css');
     if (isset($form_state['values']['Edit'])) {
       $teacher_select = $form_state['values']['Edit'];
       $prevalues = get_prevalues($teacher_select);
@@ -110,7 +111,7 @@
       '#type' => 'select',
       '#title' => t('Choose a value'),
       '#id' => 'names',
-      '#options' => get_teacher_names1(),
+      '#options' => get_teacher_names(),
       '#states' => array(
         'visible' => array(
         ':input[name="choice"]' => array('value' => '0'),
@@ -160,6 +161,40 @@
 
 
   // dpm($prevalues);
+    $form['kstar'] = array(
+      '#prefix' => '<div id="Knowledge-rating-star class = "divspace">
+      Knowledge<br>
+      <span class = "whitestar spanspace"></span>
+      <span class = "whitestar spanspace"></span>
+      <span class = "whitestar spanspace"></span>
+      <span class = "whitestar spanspace"></span>
+      <span class = "whitestar spanspace"></span>',
+      '#suffix' => '</div>',
+      '#type' => 'container',
+    );
+    $form['astar'] = array(
+      '#prefix' => '<div id="Attitude-rating-star class = "divspace">
+      Attitude<br>
+      <span class = "whitestar spanspace"></span>
+      <span class = "whitestar spanspace"></span>
+      <span class = "whitestar spanspace"></span>
+      <span class = "whitestar spanspace"></span>
+      <span class = "whitestar spanspace"></span>',
+      '#suffix' => '</div>',
+      '#type' => 'container',
+    );
+    $form['fstar'] = array(
+      '#prefix' => '<div id="Friendliness-rating-star class = "divspace">
+      Friendliness<br>
+      <span class = "whitestar spanspace"></span>
+      <span class = "whitestar spanspace"></span>
+      <span class = "whitestar spanspace"></span>
+      <span class = "whitestar spanspace"></span>
+      <span class = "whitestar spanspace"></span>',
+      '#suffix' => '</div>',
+      '#type' => 'container',
+    );
+
     $form['teacher_rating_wrapper']['Knowledge'] = array(
       '#type' => 'textfield',
       '#title' => 'Knowledge',

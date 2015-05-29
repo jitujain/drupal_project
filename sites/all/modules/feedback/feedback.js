@@ -6,6 +6,12 @@
     });
   });
 
+  $(document).ready(function(){
+    $("#k1").click(function(){
+      $no = $("#")
+    });
+  });
+
   Drupal.behaviors.feedback = {
     attach: function (context, settings) {
       // Your Javascript code goes here
