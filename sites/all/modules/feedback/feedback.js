@@ -3,6 +3,13 @@
   $(document).ready(function(){
     $("#edit-choice-0").click(function(){
       $("input:text").val('');
+      $("span").removeClass("redstar");
+    });
+  });
+  $(document).ready(function(){
+    $("#edit-choice-1").click(function(){
+      $("input:text").val('');
+      $("span").removeClass("redstar");
     });
   });
 
@@ -11,33 +18,26 @@
       $len = $(this).attr("class");
       $s = $len.split(" ");
       var no = $s[3];
-     // $("span").eq(i).addClass("redstar");
-      var i;
-      // for(i=1 ; i=<no ;i++) {
-      //   $("span")."whitestar.spanspace.knowledge".i.addClass("redstar");
-
-      // }
-      if($(this).attr("class") == "whitestar spanspace knowledge 4")
-      {
-        alert("hello");
+      $("span.knowledge").removeClass("redstar");
+      for(var i = 1 ; i <= no ;i++) {
+        $("span.whitestar.spanspace.knowledge."+i).addClass("redstar");
       }
+      $("#edit-knowledge").val(no);
+
 
     });
   });
-
-$(document).ready(function(){
-    $("whitspace").click(function(){
-      if($(this).attr("class").match("abc") && $(this).attr("class").match("xyz") )
-      {
-        alert("hello");
-      }
-
 
   $(document).ready(function(){
     $("span.attitude").click(function(){
       $len = $(this).attr("class");
       $s = $len.split(" ");
-      alert($s[3]);
+      var no = $s[3];
+      $("span.attitude").removeClass("redstar");
+      for(var i = 1 ; i <= no ;i++) {
+        $("span.whitestar.spanspace.attitude."+i).addClass("redstar");
+      }
+      $("#edit-attitude").val(no);
 
     });
   });
@@ -45,7 +45,12 @@ $(document).ready(function(){
     $("span.friendliness").click(function(){
       $len = $(this).attr("class");
       $s = $len.split(" ");
-      alert($s[3]);
+      var no = $s[3];
+      $("span.friendliness").removeClass("redstar");
+      for(var i = 1 ; i <= no ;i++) {
+        $("span.whitestar.spanspace.friendliness."+i).addClass("redstar");
+      }
+      $("#edit-friendliness").val(no);
 
     });
   });
