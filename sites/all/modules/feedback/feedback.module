@@ -197,32 +197,18 @@
     );
 
     $form['teacher_rating_wrapper']['Knowledge'] = array(
-      '#type' => 'textfield',
-      '#title' => 'Knowledge',
-      '#description' => 'Give Rating from 0 to 5',
-      '#value' => isset($prevalues['Knowledge']) ? $prevalues['Knowledge'] : '',
+      '#type' => 'hidden',
+      '#default_value' => isset($prevalues['Knowledge']) ? $prevalues['Knowledge'] : '',
     );
     $form['teacher_rating_wrapper']['Attitude'] = array(
-      '#type' => 'textfield',
-      '#title' => 'Attitude',
-      '#description' => 'Give Rating from 0 to 5',
+      '#type' => 'hidden',
       '#default_value' => isset($prevalues['Attitude']) ? $prevalues['Attitude'] : '',
     );
 
     $form['teacher_rating_wrapper']['Friendliness'] = array(
-      '#type' => 'textfield',
-      '#title' => 'Friendliness',
-      '#description' => 'Give Rating from 0 to 5',
+      '#type' => 'hidden',
       '#default_value' => isset($prevalues['Friendliness']) ? $prevalues['Friendliness'] : '',
     );
-
-
-    //Adding submit button
-    // $form['sub'] = array(
-    //   '#prefix' => '<div id="eacher_rr">',
-    //   '#suffix' => '</div>',
-    //   '#type'  => 'container',
-    // );
 
     //Adding submit button
     $form['submit_button'] = array(
@@ -238,7 +224,7 @@
   function add_prefill_value($form, &$form_state){
 
     if (isset($form_state['values']['Edit'])) {
-      $form_state['rebuild'] = TRUE;
+      //$form_state['rebuild'] = TRUE;
       return $form['teacher_rating_wrapper'];
     }
      // if (isset($form_state['values']['Add'])) {

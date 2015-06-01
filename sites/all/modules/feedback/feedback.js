@@ -2,13 +2,17 @@
 
   $(document).ready(function(){
     $("#edit-choice-0").click(function(){
-      $("input:text").val('');
+      $('input[name="Knowledge"]').val('');
+      $('input[name="Attitude"]').val('');
+      $('input[name="Friendliness"]').val('');
       $("span").removeClass("redstar");
     });
   });
   $(document).ready(function(){
     $("#edit-choice-1").click(function(){
-      $("input:text").val('');
+      $('input[name="Knowledge"]').val('');
+      $('input[name="Attitude"]').val('');
+      $('input[name="Friendliness"]').val('');
       $("span").removeClass("redstar");
     });
   });
@@ -22,7 +26,7 @@
       for(var i = 1 ; i <= no ;i++) {
         $("span.whitestar.spanspace.knowledge."+i).addClass("redstar");
       }
-      $("#edit-knowledge").val(no);
+      $('input[name="Knowledge"]').val(no);
 
 
     });
@@ -37,7 +41,7 @@
       for(var i = 1 ; i <= no ;i++) {
         $("span.whitestar.spanspace.attitude."+i).addClass("redstar");
       }
-      $("#edit-attitude").val(no);
+      $('input[name="Attitude"]').val(no);
 
     });
   });
@@ -50,7 +54,7 @@
       for(var i = 1 ; i <= no ;i++) {
         $("span.whitestar.spanspace.friendliness."+i).addClass("redstar");
       }
-      $("#edit-friendliness").val(no);
+      $('input[name="Friendliness"]').val(no);
 
     });
   });
