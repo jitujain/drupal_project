@@ -440,7 +440,7 @@
           $students = user_load($nodes->uid);
           if (in_array('student', $students->roles)) {
             if (isset($students->name) && !empty($students->name)) {
-              $student_names[$students->uid] = $students->name;
+              $student_names[$students->name] = $students->name;
             }
           }
         }
@@ -520,4 +520,17 @@
          return $form['given'];
   }
 
-
+/**
+*hook_form_alter implementation.
+*/
+  function feedback_form_alter(&$form, &$form_state, $form_id) {
+    if ($form_id == 'views_exposed_form') {
+      dpm($form_state);
+      $form['select'] = array(
+      '#type' => 'select',
+      '#title' => t('Choose a value'),
+      '#id' => 'csv_select',
+      '#options' => get_students_names(),
+      );
+    }
+  }

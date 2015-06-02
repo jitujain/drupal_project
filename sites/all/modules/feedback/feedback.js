@@ -1,6 +1,5 @@
 (function ($) {
 
-
   $(document).ready(function(){
     $("#edit-choice-0").click(function(){
       $('input[name="Knowledge"]').val('');
@@ -43,6 +42,10 @@
         $("span.whitestar.spanspace.friendliness."+i).addClass("redstar");
       }
       $('input[name="Friendliness"]').val(no);
+    });
+    $("#csv_select").click(function(){
+      alert($this.val());
+
     });
   });
   Drupal.behaviors.feedback = {

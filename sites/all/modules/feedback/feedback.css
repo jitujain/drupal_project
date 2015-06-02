@@ -1,22 +1,27 @@
+/**
+ * @file
+ *
+ */
+
 .whitestar{
   background-image: url("/sites/all/modules/feedback/images/star3.jpg");
 }
+
 .redstar{
   background-image: url("/sites/all/modules/feedback/images/star1.jpg");
 }
+
 .spanspace{
   display: inline-block;
   height: 20px;
   width: 22px;
 }
+
 .divspace{
   height: 50px;
   width: 290px;
 }
-.divspace:span
-{
 
+#views-exposed-form-view-csv-page .views-widget-filter-name{
+  display: none;
 }
-.knowledge{}
-.attitude{}
-.friendliness{}
