@@ -1,5 +1,6 @@
 (function ($) {
 
+
   $(document).ready(function(){
     $("#edit-choice-0").click(function(){
       $('input[name="Knowledge"]').val('');
@@ -7,17 +8,12 @@
       $('input[name="Friendliness"]').val('');
       $("span").removeClass("redstar");
     });
-  });
-  $(document).ready(function(){
     $("#edit-choice-1").click(function(){
       $('input[name="Knowledge"]').val('');
       $('input[name="Attitude"]').val('');
       $('input[name="Friendliness"]').val('');
       $("span").removeClass("redstar");
     });
-  });
-
-  $(document).ready(function(){
     $("span.knowledge").click(function(){
       $len = $(this).attr("class");
       $s = $len.split(" ");
@@ -27,12 +23,7 @@
         $("span.whitestar.spanspace.knowledge."+i).addClass("redstar");
       }
       $('input[name="Knowledge"]').val(no);
-
-
     });
-  });
-
-  $(document).ready(function(){
     $("span.attitude").click(function(){
       $len = $(this).attr("class");
       $s = $len.split(" ");
@@ -42,10 +33,7 @@
         $("span.whitestar.spanspace.attitude."+i).addClass("redstar");
       }
       $('input[name="Attitude"]').val(no);
-
     });
-  });
-  $(document).ready(function(){
     $("span.friendliness").click(function(){
       $len = $(this).attr("class");
       $s = $len.split(" ");
@@ -55,15 +43,25 @@
         $("span.whitestar.spanspace.friendliness."+i).addClass("redstar");
       }
       $('input[name="Friendliness"]').val(no);
-
     });
   });
-
   Drupal.behaviors.feedback = {
     attach: function (context, settings) {
-      // Your Javascript code goes here
-    // alert(Drupal.settings.feedback.tax_rate);
-
+      console.log(Drupal.ajax);
+      $("span").removeClass("redstar");
+      var kn = $('input[name="Knowledge"]').val();
+      var at = $('input[name="Attitude"]').val();
+      var fn = $('input[name="Friendliness"]').val();
+      for(var i = 1 ; i <= kn ;i++) {
+        $("span.whitestar.spanspace.knowledge."+i).addClass("redstar");
+      }
+      for(var i = 1 ; i <= at ;i++) {
+        $("span.whitestar.spanspace.attitude."+i).addClass("redstar");
+      }
+      for(var i = 1 ; i <= fn ;i++) {
+        $("span.whitestar.spanspace.friendliness."+i).addClass("redstar");
+      }
     }
   };
+
 }(jQuery));
