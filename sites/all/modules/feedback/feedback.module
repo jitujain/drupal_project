@@ -81,22 +81,22 @@
     );
     return $items;
   }
-
-
-/*
-*Creation of a form.
-*
-* $form['choice'] add the radio buttons.
-* $form['Add'] add the dropdownlist
-* -in which values are get from get_teacher_names() function.
-* $form['Edit'] add the dropdownlist
-* -in which values are get from get_feed_teacher_names() function.
-*/
+  /**
+   * Callback for feedback_menu hook.
+   *
+   * @param $form.
+   * @param $form_state.
+   */
   function form_feed_form($form, &$form_state) {
+    // Check which radio button is set.
     if (isset($form_state['values']['Edit'])) {
+      // Get the selected value from drop-down.
       $teacher_select = $form_state['values']['Edit'];
+      // Call the  function get_prevalues().
       $prevalues = get_prevalues($teacher_select);
     }
+    // Form elements.
+    // Radio buttons with option Add and Edit.
     $form['choice'] = array(
       '#type' => 'radios',
       '#title' => t('select yr choice'),
@@ -107,7 +107,9 @@
       t('Edit'),
       )
     );
-
+    // Drop-down list.
+    // Render when Add radio button is selected.
+    // For option list call the get_teacher_names().
     $form['Add'] = array(
       '#type' => 'select',
       '#title' => t('Choose a value'),
@@ -119,7 +121,10 @@
         ),
       ),
     );
-
+    // Drop-down list.
+    // Render when Edit radio button is selected.
+    // For option list call the get_feedback_teacher_names().
+    // Ajax is apply.
     $form['Edit'] = array(
       '#type' => 'select',
       '#title' => t('Choose a value'),
@@ -137,16 +142,18 @@
         'method' => 'html',
       ),
     );
-
-
+    // Wrapper for ajax.
     $form['teacher_rating_wrapper'] = array(
       '#prefix' => '<div id="teacher_rating_wrapper">',
       '#suffix' => '</div>',
       '#type' => 'container',
     );
 
-  //Following code is about the rating fields.
-  //This code show the star on the form.
+    // Following code is about the rating fields.
+    // This code show the star on the form.
+
+    // For knowledge field.
+    // Add 1--5 as class for selector.
     $form['kstar'] = array(
       '#prefix' => '<div id="Knowledge-rating-star" class = "divspace">
       Knowledge<br>
@@ -158,6 +165,8 @@
       '#suffix' => '</div>',
       '#type' => 'container',
     );
+    // For attitude field.
+    // Add 1--5 as class for selector.
     $form['astar'] = array(
       '#prefix' => '<div id="Attitude-rating-star" class = "divspace">
       Attitude<br>
@@ -169,6 +178,8 @@
       '#suffix' => '</div>',
       '#type' => 'container',
     );
+    // For friendliness field.
+    // Add 1--5 as class for selector.
     $form['fstar'] = array(
       '#prefix' => '<div id="Friendliness-rating-star" class = "divspace">
       Friendliness<br>
@@ -180,16 +191,20 @@
       '#suffix' => '</div>',
       '#type' => 'container',
     );
-
+    // Hidden field for knowledge .
+    // Values are passed for this field is equal to no. of selected star.
     $form['teacher_rating_wrapper']['Knowledge'] = array(
       '#type' => 'hidden',
       '#value' => isset($prevalues['Knowledge']) ? $prevalues['Knowledge'] : '',
     );
+    // Hidden field for attitude .
+    // Values are passed for this field is equal to no. of selected star.
     $form['teacher_rating_wrapper']['Attitude'] = array(
       '#type' => 'hidden',
       '#value' => isset($prevalues['Attitude']) ? $prevalues['Attitude'] : '',
     );
-
+    // Hidden field for friendliness .
+    // Values are passed for this field is equal to no. of selected star.
     $form['teacher_rating_wrapper']['Friendliness'] = array(
       '#type' => 'hidden',
       '#value' => isset($prevalues['Friendliness']) ? $prevalues['Friendliness'] : '',
@@ -202,9 +217,10 @@
   return $form;
   }
   /**
-  *Callback wrapper function.
-  *It add the pre values to the star rating.
-  */
+   * Callback wrapper function.
+   *
+   * @return $form['teacher_rating_wrapper'].
+   */
   function add_prefill_value($form, &$form_state) {
 
     if (isset($form_state['values']['Edit'])) {
@@ -212,20 +228,35 @@
       return $form['teacher_rating_wrapper'];
     }
   }
+  /**
+   * Callback function get_prevalues().
+   *
+   * @param $teacher_select.
+   *   This is selected teacher name from drop drow.
+   *
+   * @return $prefillvalues.
+   *   This is array of pre rating values.
+   */
   function get_prevalues($teacher_select) {
     global $user;
+    // Build an EntityFieldQuery for a entity type node.
+    // Machine name of content_type is teacher_feedback.
     $query = new EntityFieldQuery();
     $query->entityCondition('entity_type', 'node')
           ->entityCondition('bundle', 'teacher_feedback');
     $result = $query->execute();
-    //dpm($result);
+    // Get all node nids.
     $nids = array_keys($result['node']);
+    // Load a node on their nid.
     foreach ($nids as $key => $nid) {
       $nodes = node_load($nid);
-
-      if ($user->uid==$nodes->uid) {
+      // Check whether logged in user uid is equals to node uid.
+      if ($user->uid == $nodes->uid) {
+        // Get the teacher reference.
         $teacher_ref=$nodes->field_teacher_ref['und'][0]['target_id'];
+        // Check whether paramter is equal to teacher_reference
         if ($teacher_select == $teacher_ref) {
+          // If condition true then assign the pre values in the array keys.
           $prefillvalues = array(
             'Knowledge' => $nodes->field_knowledge['und'][0]['value'],
             'Attitude' => $nodes->field_attitude['und'][0]['value'],
@@ -237,9 +268,11 @@
   }
 
   /**
-  *Validate function
-  */
+   * Validate function for form submission.
+   *
+   */
   function form_feed_form_validate($form, &$form_state) {
+    // Check whether field are empty or not.
     if ($form_state['input']['Knowledge'] == "" ||
         $form_state['input']['Attitude'] == "" ||
         $form_state['input']['Friendliness'] == "") {
@@ -260,22 +293,24 @@
 
   }
 
-/**
-*This function get the names of all teachers
-*It is get user name by entityfieldquery
-*
-*/
+  /**
+   * Callback function for Add radio button.
+   *
+   * @return $teacher_names.
+   *   An array of teacher names.
+   *
+   */
   function get_teacher_names() {
-
+    // build the EntityFieldQuery for entity_type user.
     $query = new EntityFieldQuery();
     $query->entityCondition('entity_type', 'user');
     $result = $query->execute();
-    //get all uid of all users
+    // Get all uid of all users
     $uids = array_keys($result['user']);
-    //get all User with respect their uid
+    // Get all User with respect their uid
     foreach ($uids as $key => $uid) {
       $user = user_load($uid);
-      //select only those user who have 'teacher' as role
+      // Select only those user who have 'teacher' as role
        if (in_array('teacher', $user->roles)) {
         if (isset($user->name) && !empty($user->name)) {
           $teacher_names[$uid] = $user->name;
@@ -284,28 +319,32 @@
     }
     $feedback_teacher[]=get_feedback_teacher_names();
     if (!empty(get_feedback_teacher_names())) {
+      // @return array difference of two arryas
+      // first array is all teachers and second one is those teachers for which
+      // feedback is given by the current user.
       return array_diff($teacher_names, get_feedback_teacher_names());
     }
     else{
       return $teacher_names;
     }
   }
-  /**Get teachers names for those feedback is given.
-  *
-  */
+  /**
+   * Callback for Edit radio buttton.
+   *
+   * @return $feed_teacher_names;
+   *   An array of teacher names for which feedback is given.
+   */
   function get_feedback_teacher_names() {
     global $user;
     $query = new EntityFieldQuery();
     $query->entityCondition('entity_type', 'node')
           ->entityCondition('bundle', 'teacher_feedback');
     $result = $query->execute();
-    //get all uid of all users
-    //dpm($user);
+    // Get all uid of all users.
     if (!empty($result)) {
     $nids = array_keys($result['node']);
     foreach ($nids as $key => $nid) {
       $nodes = node_load($nid);
-      //dpm($nodes);
       if ($user->uid==$nodes->uid) {
         $authors = user_load($nodes->field_teacher_ref['und'][0]['target_id']);
         if (in_array('teacher', $authors->roles)) {
@@ -324,17 +363,15 @@
 
   }
 
-/**
-*Submission of the form
-* Create a node and
-* on submission form values saved in database.
-* It check also a condition whether node is created or updated.
-*/
+  /**
+   * Form submit function.
+   *
+   */
 
   function form_feed_form_submit($form, &$form_state) {
     global $user;
     $current_nid;
-    //This code is use to get current node nid.
+    // This code is use to get current node nid.
     $query = new EntityFieldQuery();
     $query->entityCondition('entity_type', 'node')
           ->entityCondition('bundle', 'teacher_feedback');
@@ -350,7 +387,9 @@
         }
       }
     }
+    // If Add radio is click.
     if ($form_state['values']['choice'] == 0) {
+      // Create a new node.
       $node = new stdClass();
       $node->language = LANGUAGE_NONE;
       $node->type = 'teacher_feedback';
@@ -359,10 +398,13 @@
       $node->status = 1;
       $node->field_teacher_ref[$node->language][0]['target_id'] = $form_state['values']['Add'];
     }
+    // If Edit radio button is click.
     if ($form_state['values']['choice'] == 1) {
+      // Load current node on the basis if current nid.
       $node = node_load($current_nid);
       $node->field_teacher_ref[$node->language][0]['target_id'] = $form_state['values']['Edit'];
     }
+    // Set the values in node fields.
     $node->title = 'Feedback is save on ' . date('c');
     $node->field_attitude[$node->language][0]['value'] = $form_state['input']['Attitude'];
     $node->field_knowledge[$node->language][0]['value'] = $form_state['input']['Knowledge'];
@@ -525,11 +567,11 @@
 */
   function feedback_form_alter(&$form, &$form_state, $form_id) {
     if ($form_id == 'views_exposed_form') {
-      dpm($form_state);
       $form['select'] = array(
       '#type' => 'select',
       '#title' => t('Choose a value'),
       '#id' => 'csv_select',
+      '#weight' => -10,
       '#options' => get_students_names(),
       );
     }

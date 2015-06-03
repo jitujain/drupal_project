@@ -1,27 +1,37 @@
 /**
- * @file
+ * @filefeedback.module
+ * This file is used to add rating star.
  *
  */
 
-.whitestar{
+.whitestar {
   background-image: url("/sites/all/modules/feedback/images/star3.jpg");
 }
 
-.redstar{
+.redstar {
   background-image: url("/sites/all/modules/feedback/images/star1.jpg");
 }
 
-.spanspace{
+.spanspace {
   display: inline-block;
   height: 20px;
   width: 22px;
 }
 
-.divspace{
+.divspace {
   height: 50px;
   width: 290px;
 }
 
-#views-exposed-form-view-csv-page .views-widget-filter-name{
-  display: none;
+#views-exposed-form-view-csv-page .views-widget-filter-name {
+
+}
+
+.views-exposed-widget.views-submit-button .form-item {
+  display: inline-block;
+
+}
+#edit-submit-view-csv.form-submit {
+  margin-left: 10px;
+  margin-top: 0px;
 }
