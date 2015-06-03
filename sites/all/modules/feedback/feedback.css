@@ -24,7 +24,7 @@
 }
 
 #views-exposed-form-view-csv-page .views-widget-filter-name {
-
+  display: none;
 }
 
 .views-exposed-widget.views-submit-button .form-item {
