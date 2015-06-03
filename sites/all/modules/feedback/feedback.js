@@ -53,9 +53,7 @@
     });
     //On select option from drop-down, selected value is pass to the text-field
     //of id = edit-name
-    $('select[name="select"]').change(function() {
-      $("#edit-name").val($(this).val());
-    });
+
   });
   //This behaviour function is add the redstar class on the basis of previous values.
   //user can change the values.
@@ -76,10 +74,12 @@
       }
     }
   };
-  // Drupal.behaviors.views_exposed_form = {
-  //   attach: function (context, settings) {
-  //     $("#edit-name").val($('csv_select').val());
-  //   }
-  // };
+  Drupal.behaviors.feedback1 = {
+    attach: function (context, settings) {
+      $('select[name="select"]').change(function() {
+        $("#edit-name").val($(this).val());
+      });
+    }
+  };
 
 }(jQuery));
