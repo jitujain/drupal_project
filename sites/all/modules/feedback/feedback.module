@@ -1,12 +1,12 @@
   <?php
+    // Add the css and js files.
     drupal_add_js(drupal_get_path('module', 'feedback') . '/feedback.js');
     drupal_add_css(drupal_get_path('module', 'feedback') . '/feedback.css');
 
 /*
-*hook_permission implementation.
-* This function register this menu for the permission page.
-* From the permission page admin can define the roles.
-*/
+ * Implementation of hook_permission .
+ *
+ */
 
   function feedback_permission() {
     return array(
@@ -26,9 +26,9 @@
   }
 
   /**
-  * Block hook Implementaion.
-  * It create a block and add it to the block UI.
-  */
+   * Block hook Implementaion.
+   *
+   */
   function feedback_block_info() {
     $blocks = array();
     $blocks['feedback_rating_avg_block'] = array(
@@ -38,27 +38,26 @@
     return $blocks;
   }
   /**
-  *This function is about what is the render to the block.
-  */
-
+   * This function is about what is the render to the block.
+   */
   function feedback_block_view($delta='') {
     $block = array();
     switch ($delta) {
       case 'feedback_rating_avg_block' :
         $block['subject'] = t('Your Rating');
+        // Call get_avg().
         $block['content'] = get_avg();
         break;
     }
     return $block;
   }
 
-/*
-*hook_menu function implementation.
-*
-* $items['teacher/feedback'] is return a form.
-* The path of that page is 'teacher/feedback'.
-*/
+  /*
+   * Implementation of hook_menu function.
+   *
+   */
   function feedback_menu() {
+    // Feedback form for student.
     $items['teacher/feedback'] = array(
       'title' => 'Feedback Page',
       'description' => 'Simple custom hook_menu() implementation.',
@@ -66,9 +65,8 @@
       'page arguments' => array('form_feed_form'),
       'access callback' => 'user_access',
       'access arguments' => array('give feedback'),
-
-
     );
+    // View feedback form for teacher.
     $items['teacher/view-feedback'] = array(
       'title' => 'Feedback Page',
       'description' => 'Simple custom hook_menu() implementation.',
@@ -414,16 +412,18 @@
   }
 
 
-/**
-* Form which render the student list whose
-* -given the feedback to the logged teacher.
-*/
+  /**
+   * Callback for view feedback form for teacher.
+   */
   function student_feedback_form($form, &$form_state) {
+    // Check whether drop down selected or not..
     if (isset($form_state['values']['selectlist'])) {
+      // Get the selected value from drop-down.
       $student_select = $form_state['values']['selectlist'];
+      // Call the  function get_values().
       $given_rating = get_values($student_select);
     }
-
+    // Drop down form element.
     $form['selectlist'] = array(
       '#type' => 'select',
       '#title' => t('Choose a value'),
@@ -436,6 +436,7 @@
         'method' => 'replace',
       ),
     );
+    // Container which a div of id given_rating_wrapper.
     $form['given'] = array(
       '#tree' => TRUE,
       '#type' => 'container',
@@ -462,19 +463,20 @@
     return $form;
   }
   /**
-  *Function return the student names.
-  *
-  *This function return those students name whose are given the feedback to
-  * logged teacher.
-  */
+   * Callback function for form_alter hook.
+   *
+   * @return $student_names.
+   *   This function return those students name whose are given the feedback to
+   *   logged teacher.
+   */
   function get_students_names() {
     global $user;
     $query = new EntityFieldQuery();
     $query->entityCondition('entity_type', 'node')
           ->entityCondition('bundle', 'teacher_feedback');
     $result = $query->execute();
-    //get all uid of all users
-    if (!empty($result)) {
+    // Get all uid of all users
+    if ( !empty($result)) {
       $nids = array_keys($result['node']);
       foreach ($nids as $key => $nid) {
         $nodes = node_load($nid);
@@ -494,15 +496,18 @@
     return $student_names;
   }
   /**
-  *Function return the Average rating.
-  */
+   * Callback for block.
+   *
+   * @return avg.
+   *   Average rating for current logged in teacher.
+   */
   function get_avg() {
     global $user;
     $query = new EntityFieldQuery();
     $query->entityCondition('entity_type', 'node')
           ->entityCondition('bundle', 'teacher_feedback');
     $result = $query->execute();
-    //get all uid of all users
+    // Get all uid of all users.
     $sum = 0;
     $count = 0;
     if (!empty($result)) {
@@ -511,10 +516,13 @@
         $nodes = node_load($nid);
           if ($user->uid == $nodes->field_teacher_ref['und'][0]['target_id']) {
             $students = user_load($nodes->uid);
+            // Numbers of students whose are given the feedback to current logged in teacher.
             $count++;
+            // Perform calculation and get sum of all ratings.
             $sum += $nodes->field_attitude['und'][0]['value'] + $nodes->field_knowledge['und'][0]['value'] + $nodes->field_friendliness['und'][0]['value'];
           }
       }
+      // Get average.
       if ($count != 0) {
         $avg = '' . $sum / (3 * $count);
       }
@@ -524,12 +532,15 @@
     }
     return $avg;
   }
-  /**
-  *Function return the pervious value.
-  *
-  *It take a one argument and return the result on the basis of that argument.
-  *It return the rating values submitted by $student_select for logged teacher
-  */
+   /**
+   * Callback function get_values().
+   *
+   * @param $student_select.
+   *   This is selected student name from drop drow.
+   *
+   * @return $rating_values.
+   *   This is array of pre rating values.
+   */
   function get_values($student_select) {
     global $user;
     $query = new EntityFieldQuery();
@@ -556,15 +567,14 @@
     return $rating_values;
   }
   /**
-  *Ajax Wrapping function.
-  */
+   * Ajax Wrapping function.
+   */
   function show_values($form, &$form_state) {
          return $form['given'];
   }
-
-/**
-*hook_form_alter implementation.
-*/
+  /**
+   * Implementation of hook_form_alter.
+   */
   function feedback_form_alter(&$form, &$form_state, $form_id) {
     if ($form_id == 'views_exposed_form') {
       $form['select'] = array(
