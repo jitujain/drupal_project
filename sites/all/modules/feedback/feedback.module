@@ -2,8 +2,6 @@
     // Add the css and js files.
     drupal_add_js(drupal_get_path('module', 'feedback') . '/feedback.js');
     drupal_add_css(drupal_get_path('module', 'feedback') . '/feedback.css');
-    module_load_include('inc', 'feedback', 'teacher_feedback');
-    module_load_include('inc', 'feedback', 'teacher_view_feedback');
     module_load_include('inc', 'feedback', 'feedback_form_alter');
 
 
@@ -65,6 +63,8 @@
     $items['teacher/feedback'] = array(
       'title' => 'Feedback Page',
       'description' => 'Simple custom hook_menu() implementation.',
+      'file' => 'teacher_feedback.inc',
+      'file path' => drupal_get_path('module','feedback'),
       'page callback' => 'drupal_get_form',
       'page arguments' => array('form_feed_form'),
       'access callback' => 'user_access',
@@ -75,12 +75,22 @@
     $items['teacher/view-feedback'] = array(
       'title' => 'Feedback Page',
       'description' => 'Simple custom hook_menu() implementation.',
+      'file' => 'teacher_view_feedback.inc',
+      'file path' => drupal_get_path('module','feedback'),
       'page callback' => 'drupal_get_form',
       'page arguments' => array('student_feedback_form'),
       'access callback' => 'user_access',
       'access arguments' => array('view feedback'),
-
-
+    );
+    // Form for hook_theme.
+    $items['feedback/theme'] = array(
+      'title' => 'Feedback Page',
+      'description' => 'Simple custom hook_menu() implementation.',
+      'file' => 'teacher_detail.inc',
+      'file path' => drupal_get_path('module','feedback'),
+      'page callback' => '_user_detail',
+      'access callback' => 'user_access',
+      'access arguments' => array('give feedback'),
     );
     return $items;
   }
@@ -98,4 +108,58 @@
       '#options' => get_students_names(),
       );
     }
+  }
+   /**
+   * Callback for block.
+   *
+   * @return avg.
+   *   Average rating for current logged in teacher.
+   */
+  function get_avg() {
+    global $user;
+    $query = new EntityFieldQuery();
+    $query->entityCondition('entity_type', 'node')
+          ->entityCondition('bundle', 'teacher_feedback');
+    $result = $query->execute();
+    // Get all uid of all users.
+    $sum = 0;
+    $count = 0;
+    if (!empty($result)) {
+      $nids = array_keys($result['node']);
+      foreach ($nids as $key => $nid) {
+        $nodes = node_load($nid);
+          if ($user->uid == $nodes->field_teacher_ref['und'][0]['target_id']) {
+            $students = user_load($nodes->uid);
+            // Numbers of students whose are given the feedback to current logged in teacher.
+            $count++;
+            // Perform calculation and get sum of all ratings.
+            $sum += $nodes->field_attitude['und'][0]['value'] + $nodes->field_knowledge['und'][0]['value'] + $nodes->field_friendliness['und'][0]['value'];
+          }
+      }
+      // Get average.
+      if ($count != 0) {
+        $avg = '' . $sum / (3 * $count);
+      }
+      else {
+        $avg = 'No one give rating  you yet' ;
+      }
+    }
+    return $avg;
+  }
+  /**
+   * Implementation of hook_theme.
+   */
+  function feedback_theme($aa) {
+    dpm($aa);
+    return array(
+      'feedback' => array(
+        'variable' => array(
+          'Uid' => NULL,
+          'Uname' => NULL
+          ),
+        //'template' => 'user_detail'
+        )
+      );
+
+
   }

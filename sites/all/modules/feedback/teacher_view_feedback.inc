@@ -50,43 +50,7 @@
     return $form;
   }
 
-  /**
-   * Callback for block.
-   *
-   * @return avg.
-   *   Average rating for current logged in teacher.
-   */
-  function get_avg() {
-    global $user;
-    $query = new EntityFieldQuery();
-    $query->entityCondition('entity_type', 'node')
-          ->entityCondition('bundle', 'teacher_feedback');
-    $result = $query->execute();
-    // Get all uid of all users.
-    $sum = 0;
-    $count = 0;
-    if (!empty($result)) {
-      $nids = array_keys($result['node']);
-      foreach ($nids as $key => $nid) {
-        $nodes = node_load($nid);
-          if ($user->uid == $nodes->field_teacher_ref['und'][0]['target_id']) {
-            $students = user_load($nodes->uid);
-            // Numbers of students whose are given the feedback to current logged in teacher.
-            $count++;
-            // Perform calculation and get sum of all ratings.
-            $sum += $nodes->field_attitude['und'][0]['value'] + $nodes->field_knowledge['und'][0]['value'] + $nodes->field_friendliness['und'][0]['value'];
-          }
-      }
-      // Get average.
-      if ($count != 0) {
-        $avg = '' . $sum / (3 * $count);
-      }
-      else {
-        $avg = 'No one give rating  you yet' ;
-      }
-    }
-    return $avg;
-  }
+
    /**
    * Callback function get_values().
    *
